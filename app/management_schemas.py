@@ -94,6 +94,16 @@ class PaymentCreate(BaseModel):
     paid_at: datetime | None = None
 
 
+class PaymentUpdate(BaseModel):
+    due_date: date | None = None
+    amount: float | None = Field(default=None, gt=0)
+    paid_amount: float | None = Field(default=None, ge=0)
+    method: str | None = None
+    status: str | None = None
+    transaction_reference: str | None = None
+    paid_at: datetime | None = None
+
+
 class LeadUpdate(BaseModel):
     stage: str | None = None
     priority: str | None = None
@@ -159,6 +169,12 @@ class BranchCreate(BaseModel):
     name: str = Field(min_length=2, max_length=140)
     location: str | None = None
     active: bool = True
+
+
+class BranchUpdate(BaseModel):
+    name: str | None = None
+    location: str | None = None
+    active: bool | None = None
 
 
 class NoteCreate(BaseModel):
