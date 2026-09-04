@@ -12,7 +12,7 @@
       <img src="/static/zenith-logo.png" alt="Zenith Horizon Insurance Company Limited" class="login-logo" />
       <span class="eyebrow">Secure staff portal</span>
       <h1>Insurance Management System</h1>
-      <p>Manage customers, policies, premiums, leads, claims, work queues, staff and reports from one place.</p>
+      <p>Manage customers, policies, premiums, leads, claims, service requests, work queues, staff and reports from one place.</p>
       <form id="loginForm" class="login-form">
         <label>Email<input id="loginEmail" type="email" autocomplete="username" required placeholder="admin@zenith.local" /></label>
         <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Enter your password" /></label>
@@ -35,11 +35,13 @@
         <button data-page="policies"><span>▣</span>Policies</button>
         <button data-page="leads"><span>◇</span>Leads & Quotes</button>
         <button data-page="claims"><span>△</span>Claims</button>
+        <button data-page="service"><span>☎</span>Service Desk</button>
         <button data-page="payments"><span>₳</span>Premiums & Payments</button>
         <button data-page="products"><span>▦</span>Products</button>
         <button data-page="tasks"><span>✓</span>Tasks & Work Queue</button>
         <button data-page="staff"><span>♙</span>Staff & Roles</button>
         <button data-page="reports"><span>▥</span>Reports</button>
+        <button data-page="audit"><span>◎</span>Audit Trail</button>
         <button data-page="settings"><span>⚙</span>Settings</button>
       </nav>
       <div class="sidebar-foot">
@@ -55,10 +57,12 @@
           <h1 id="pageTitle">Dashboard</h1>
         </div>
         <div class="topbar-actions">
+          <div class="global-search"><input id="globalSearch" type="search" placeholder="Search customer, policy, claim..." /></div>
           <button id="refreshBtn" class="secondary">Refresh</button>
           <div class="user-chip"><div class="avatar" id="userInitials">ZA</div><div><strong id="userName">Administrator</strong><span id="userRole">Administrator</span></div></div>
         </div>
       </header>
+      <div id="searchResults" class="search-results hidden"></div>
       <div id="toast" class="toast hidden"></div>
       <section id="pageContent" class="page-content"></section>
     </main>
@@ -73,5 +77,6 @@
   </div>
 
   <script src="/static/admin.js"></script>
+  <script src="/static/admin-extra.js"></script>
 </body>
 </html>
