@@ -20,3 +20,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt pytest
       - run: pytest -q
+      - name: Validate Docker Compose
+        run: docker compose config > /tmp/zenith-compose.yml
+      - name: Build application image
+        run: docker build -t zenith-digital-insurance:test .
