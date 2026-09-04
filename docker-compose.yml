@@ -19,6 +19,28 @@ services:
     networks:
       - zenith
 
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zenith-digital-insurance-backend:local
+    restart: "no"
+    init: true
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-zenith}:${POSTGRES_PASSWORD:-zenith_dev_password}@db:5432/${POSTGRES_DB:-zenith_assistant}
+      MANAGEMENT_ADMIN_EMAIL: ${MANAGEMENT_ADMIN_EMAIL:-admin@zenith.local}
+      MANAGEMENT_ADMIN_PASSWORD: ${MANAGEMENT_ADMIN_PASSWORD:-change-me-now}
+      MANAGEMENT_SESSION_HOURS: ${MANAGEMENT_SESSION_HOURS:-12}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-8}
+      UPLOAD_DIR: /app/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+    networks:
+      - zenith
+
   app:
     build:
       context: .
@@ -45,8 +67,8 @@ services:
     volumes:
       - zenith_uploads:/app/data/uploads
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
       interval: 15s
