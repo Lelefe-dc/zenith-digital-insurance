@@ -11,9 +11,9 @@ from sqlalchemy.orm import sessionmaker
 
 from app.config import get_settings
 from app.database import Base
-from app.management import create_customer, create_payment, create_policy, login
+from app.management import create_customer, create_payment, create_policy, create_staff, login
 from app.management_models import Customer, InsuranceProduct, PolicyProfile, PremiumPayment, StaffUser
-from app.management_schemas import CustomerCreate, LoginRequest, PaymentCreate, PolicyCreate
+from app.management_schemas import CustomerCreate, LoginRequest, PaymentCreate, PolicyCreate, StaffCreate
 from app.security import hash_password, verify_password
 from app.seed import seed_demo_data
 
@@ -84,3 +84,26 @@ def test_login_and_create_customer_policy_payment():
     )
     assert payment["status"] == "Paid"
     assert payment["paid_amount"] == 990.0
+
+
+def test_administrator_can_create_staff_account():
+    db = make_db()
+    settings = get_settings()
+    admin = db.query(StaffUser).filter(StaffUser.email == settings.management_admin_email.lower()).first()
+    created = create_staff(
+        StaffCreate(
+            full_name="Claims Officer",
+            email="claims.officer@zenith.local",
+            password="claims-password-123",
+            role="Claims",
+            department="Claims",
+            active=True,
+        ),
+        admin,
+        db,
+    )
+    assert created["email"] == "claims.officer@zenith.local"
+    row = db.query(StaffUser).filter(StaffUser.email == "claims.officer@zenith.local").first()
+    assert row is not None
+    assert row.password_hash != "claims-password-123"
+    assert verify_password("claims-password-123", row.password_hash)
