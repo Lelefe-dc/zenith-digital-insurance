@@ -47,8 +47,11 @@ jobs:
           MANAGEMENT_ADMIN_PASSWORD: ci-strong-admin-password
         run: python -c "from app.main import app; assert app.version == '2.1.0'; print(app.title)"
       - name: Validate Docker Compose
-        run: docker compose config > /tmp/zenith-compose.yml
+        run: |
+          docker compose config > /tmp/zenith-compose.yml
+          docker compose config --services | grep -qx migrate
+          grep -q 'service_completed_successfully' /tmp/zenith-compose.yml
       - name: Build backend image
-        run: docker compose build app
+        run: docker compose build app migrate
       - name: Build frontend image
         run: docker compose build frontend
