@@ -5,7 +5,8 @@ from pydantic import BaseModel, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    # Staff deployments may use private/internal mail domains such as .local.
+    email: str = Field(min_length=3, max_length=180)
     password: str = Field(min_length=8, max_length=200)
 
 
@@ -147,7 +148,8 @@ class TaskUpdate(BaseModel):
 
 class StaffCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=180)
-    email: EmailStr = Field(exclude=True)
+    # Kept as a string so private corporate domains remain supported.
+    email: str = Field(min_length=3, max_length=180, exclude=True)
     password: str = Field(min_length=8, max_length=200)
     role: str = "Viewer"
     department: str = "Operations"
