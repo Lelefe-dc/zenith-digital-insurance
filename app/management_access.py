@@ -17,6 +17,8 @@ RULES = [
     ("/api/v1/management/core/claims", {"Administrator", "Manager", "Claims"}),
     ("/api/v1/management/core/customers", {"Administrator", "Manager", "Underwriter"}),
     ("/api/v1/management/core/intermediaries", {"Administrator", "Manager"}),
+    ("/api/v1/management/core/approvals", ALL_OPERATORS),
+    ("/api/v1/management/core/documents", ALL_OPERATORS),
     ("/api/v1/management/customers", {"Administrator", "Manager", "Underwriter", "Agent"}),
     ("/api/v1/management/policies", {"Administrator", "Manager", "Underwriter"}),
     ("/api/v1/management/products", {"Administrator", "Manager", "Underwriter"}),
