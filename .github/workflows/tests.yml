@@ -21,8 +21,9 @@ jobs:
       - run: pip install -r requirements.txt pytest
       - name: Compile Python
         run: python -m compileall -q app tests
-      - name: Validate management JavaScript
+      - name: Validate frontend JavaScript
         run: |
+          node --check app/static/app.js
           node --check app/static/admin.js
           node --check app/static/admin-extra.js
       - name: Run tests

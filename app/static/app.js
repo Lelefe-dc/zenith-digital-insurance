@@ -7,6 +7,8 @@ const uploadBox = document.getElementById('uploadBox');
 const fileInput = document.getElementById('fileInput');
 const uploadBtn = document.getElementById('uploadBtn');
 const uploadStatus = document.getElementById('uploadStatus');
+const navToggle = document.getElementById('navToggle');
+const siteNav = document.getElementById('siteNav');
 let sessionId = null;
 let claimReference = null;
 const userId = localStorage.getItem('zenith_user_id') || `web-${crypto.randomUUID()}`;
@@ -33,8 +35,15 @@ function renderResponse(data) {
 
 async function start() {
   messages.innerHTML=''; quickReplies.innerHTML=''; uploadBox.classList.add('hidden'); claimReference=null;
-  const r = await fetch('/api/v1/chat/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:userId,channel:'web'})});
-  const data = await r.json(); sessionId=data.session_id; renderResponse(data);
+  try {
+    const r = await fetch('/api/v1/chat/start', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({user_id:userId,channel:'web'})});
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.detail || 'Service unavailable');
+    sessionId=data.session_id; renderResponse(data);
+  } catch(e) {
+    sessionId = null;
+    bubble(`The digital assistant is temporarily unavailable. Please call Zenith on +266 2232 4347 for assistance.`, 'bot');
+  }
 }
 
 async function send(value, display=null) {
@@ -60,4 +69,22 @@ uploadBtn.addEventListener('click', async () => {
     uploadStatus.textContent=`Uploaded ${data.filename} successfully.`; fileInput.value='';
   } catch(e){uploadStatus.textContent=e.message;}
 });
+
+if (navToggle && siteNav) {
+  navToggle.addEventListener('click', () => {
+    const open = siteNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.textContent = open ? '×' : '☰';
+  });
+  siteNav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+    siteNav.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.textContent = '☰';
+  }));
+}
+
+document.querySelectorAll('a[href="#assistant"]').forEach(link => {
+  link.addEventListener('click', () => setTimeout(() => input?.focus(), 450));
+});
+
 start();
