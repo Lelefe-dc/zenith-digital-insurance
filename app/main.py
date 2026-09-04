@@ -17,6 +17,7 @@ from .management import router as management_router
 from .management_access import ManagementAccessMiddleware
 from .management_extras import router as management_extras_router
 from .core_insurance import router as core_insurance_router
+from .core_governance import router as core_governance_router
 from .models import AuditEvent, Claim, ClaimAttachment
 from .schemas import ChatMessageRequest, ChatResponse, ChatStartRequest
 from .seed import seed_demo_data
@@ -38,6 +39,7 @@ app.add_middleware(ManagementAccessMiddleware)
 app.include_router(management_router)
 app.include_router(management_extras_router)
 app.include_router(core_insurance_router)
+app.include_router(core_governance_router)
 # WhatsApp is kept dormant for the final integration phase. Existing webhook
 # compatibility remains available without being part of the management UI.
 app.include_router(whatsapp_router)
