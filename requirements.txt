@@ -6,3 +6,5 @@ email-validator>=2.2,<3
 python-multipart==0.0.29
 httpx==0.28.1
 psycopg[binary]>=3.2,<4
+alembic>=1.16,<2
+reportlab>=4.2,<5
