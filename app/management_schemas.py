@@ -147,7 +147,7 @@ class TaskUpdate(BaseModel):
 
 class StaffCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=180)
-    email: EmailStr
+    email: EmailStr = Field(exclude=True)
     password: str = Field(min_length=8, max_length=200)
     role: str = "Viewer"
     department: str = "Operations"
