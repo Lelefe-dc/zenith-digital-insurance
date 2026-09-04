@@ -16,19 +16,37 @@ A runnable implementation of the **Zenith Horizon Insurance Company Limited** di
 - Audit events for material journey actions.
 - Operations dashboard for recent leads, claims and support tickets.
 - Meta WhatsApp Cloud API webhook verification, inbound message handling and outbound text adapter.
-- SQLite for quick local development and PostgreSQL configuration via Docker Compose.
+- SQLite for quick local development and PostgreSQL for the Docker stack.
 - Demo seed policies and automated journey tests.
 
-## Quick start
+## Recommended start: Docker
+
+Docker Compose starts both the application and PostgreSQL, waits for PostgreSQL to become healthy, persists the database and claim uploads in named volumes, and exposes the application on port `8000` by default.
 
 ```bash
 git clone https://github.com/Lelefe-dc/zenith-digital-insurance.git
 cd zenith-digital-insurance
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 cp .env.example .env
-bash scripts/start.sh
+```
+
+Before shared or production-like use, change at least these values in `.env`:
+
+```env
+ADMIN_TOKEN=replace-with-a-long-random-token
+POSTGRES_PASSWORD=replace-with-a-strong-password
+```
+
+Start the complete stack:
+
+```bash
+docker compose up -d --build
+```
+
+Check container health and logs:
+
+```bash
+docker compose ps
+docker compose logs -f app
 ```
 
 Open:
@@ -38,7 +56,33 @@ Open:
 - API docs: `http://localhost:8000/docs`
 - Health: `http://localhost:8000/health`
 
-The default development admin token is `change-me`. Change it in `.env` before any shared deployment.
+Stop the stack without deleting data:
+
+```bash
+docker compose down
+```
+
+To also delete the PostgreSQL and uploaded-file volumes, use this only when you intentionally want to erase Docker-managed data:
+
+```bash
+docker compose down -v
+```
+
+Set `APP_PORT` in `.env` if port 8000 is already in use, for example `APP_PORT=8080`.
+
+## Local Python start
+
+For development without Docker:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+bash scripts/start.sh
+```
+
+The default local configuration uses SQLite. The default development admin token is `change-me`; change it before any shared deployment.
 
 ## Demo policy
 
@@ -49,13 +93,36 @@ Use these values to test **My Policy**:
 
 Other seeded policies are `ZEN-100002` and `ZEN-100003`.
 
-## Docker / PostgreSQL
+## Docker architecture
+
+The Compose stack contains:
+
+- `app` — FastAPI/Uvicorn application built from this repository.
+- `db` — PostgreSQL 16 Alpine.
+- `zenith_db` — persistent PostgreSQL data volume.
+- `zenith_uploads` — persistent claim-attachment volume.
+- `zenith` — isolated bridge network for app-to-database traffic.
+
+The application image runs as a non-root user and includes a `/health` container health check. PostgreSQL also has a readiness health check, and the app waits for the database before starting.
+
+Useful Docker commands:
 
 ```bash
-docker compose up --build
-```
+# Rebuild after code changes
+docker compose up -d --build
 
-Then visit `http://localhost:8000/`.
+# Show running services and health
+docker compose ps
+
+# Follow all logs
+docker compose logs -f
+
+# Restart only the application
+docker compose restart app
+
+# Open a shell in the app container
+docker compose exec app sh
+```
 
 ## WhatsApp Cloud API
 
@@ -99,6 +166,8 @@ This repository is a functional MVP. Production launch still requires integratio
 pytest -q
 ```
 
+GitHub Actions validates the Python tests, Docker Compose configuration, and application image build on pushes to `main` and pull requests targeting `main`.
+
 ## Core project structure
 
 ```text
@@ -113,6 +182,7 @@ tests/
 scripts/start.sh
 Dockerfile
 docker-compose.yml
+.dockerignore
 ```
 
 ## Security note

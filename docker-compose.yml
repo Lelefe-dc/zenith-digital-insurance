@@ -1,32 +1,63 @@
+name: zenith-digital-insurance
+
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: zenith_assistant
-      POSTGRES_USER: zenith
-      POSTGRES_PASSWORD: zenith_dev_password
+      POSTGRES_DB: ${POSTGRES_DB:-zenith_assistant}
+      POSTGRES_USER: ${POSTGRES_USER:-zenith}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zenith_dev_password}
     volumes:
       - zenith_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zenith -d zenith_assistant"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zenith} -d ${POSTGRES_DB:-zenith_assistant}"]
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 5s
+    networks:
+      - zenith
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zenith-digital-insurance:local
+    restart: unless-stopped
+    init: true
     ports:
-      - "8000:8000"
+      - "${APP_PORT:-8000}:8000"
     environment:
-      DATABASE_URL: postgresql+psycopg://zenith:zenith_dev_password@db:5432/zenith_assistant
-      ADMIN_TOKEN: change-me
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-zenith}:${POSTGRES_PASSWORD:-zenith_dev_password}@db:5432/${POSTGRES_DB:-zenith_assistant}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-change-me}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-8}
       UPLOAD_DIR: /app/data/uploads
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-replace-with-random-verify-token}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+      WHATSAPP_GRAPH_VERSION: ${WHATSAPP_GRAPH_VERSION:-v23.0}
+      REQUIRE_POLICY_OTP: ${REQUIRE_POLICY_OTP:-false}
     volumes:
       - zenith_uploads:/app/data/uploads
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - zenith
 
 volumes:
   zenith_db:
   zenith_uploads:
+
+networks:
+  zenith:
+    driver: bridge
