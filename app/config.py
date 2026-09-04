@@ -6,14 +6,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
-    app_name: str = "Zenith Digital Insurance Assistant"
+    app_name: str = "Zenith Digital Insurance Platform"
     environment: str = "development"
     database_url: str = f"sqlite:///{BASE_DIR / 'data' / 'zenith.db'}"
     admin_token: str = "change-me"
     max_upload_mb: int = 8
     upload_dir: str = str(BASE_DIR / "data" / "uploads")
 
-    # Meta WhatsApp Cloud API settings. Leave blank for browser/demo mode.
+    # Management system bootstrap account. Change these before shared use.
+    management_admin_email: str = "admin@zenith.local"
+    management_admin_password: str = "change-me-now"
+    management_session_hours: int = 12
+
+    # Meta WhatsApp Cloud API settings are intentionally kept dormant until
+    # the management system is complete and the WhatsApp phase begins.
     whatsapp_verify_token: str = "zenith-verify-token"
     whatsapp_access_token: str = ""
     whatsapp_phone_number_id: str = ""

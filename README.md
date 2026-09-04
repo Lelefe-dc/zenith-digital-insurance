@@ -1,36 +1,55 @@
-# Zenith Digital Insurance Assistant
+# Zenith Digital Insurance Platform
 
-A runnable implementation of the **Zenith Horizon Insurance Company Limited** digital insurance assistant project manual.
+A full-stack insurance management platform for **Zenith Horizon Insurance Company Limited** with a customer self-service assistant and a secure staff management system.
 
-## What is implemented
+## Current phase
 
-- Branded customer chat simulator with the Zenith logo.
-- English and draft Sesotho conversation packs.
-- Five required journeys: **My Policy, Get a Quote, Report a Claim, Speak to an Agent, FAQ**.
-- Policy verification using policy number + date of birth, with neutral failure messages and retry limits.
-- Product-specific quote/lead capture for Motor, Property, Funeral and Life insurance.
-- First-notification-of-loss claim capture with generated claim references.
-- Claim evidence upload for JPG, PNG, WEBP and PDF files with file-size/type controls.
-- Human-agent support tickets with queue routing and conversation linkage.
-- FAQ content stored in the database.
-- Audit events for material journey actions.
-- Operations dashboard for recent leads, claims and support tickets.
-- Meta WhatsApp Cloud API webhook verification, inbound message handling and outbound text adapter.
-- SQLite for quick local development and PostgreSQL for the Docker stack.
-- Demo seed policies and automated journey tests.
+The project is now focused on the **core insurance management system**. WhatsApp integration is intentionally deferred until the management platform is complete and stable.
+
+## What the management system includes
+
+The staff portal at `/admin` now provides:
+
+- Secure staff login with expiring database-backed sessions.
+- Role-based access for Administrator, Manager, Underwriter, Claims, Finance, Agent and Viewer roles.
+- Customer registration, editing, search and customer-level policy history.
+- Insurance product catalogue and product pricing management.
+- Policy issuance, servicing, assignment, cover values, payment frequency and payment status.
+- Premium and payment capture with paid, pending, overdue, partial and reversed states.
+- Sales lead and quotation pipeline management with stages, priorities, assignment and next actions.
+- Claims operations with handler assignment, reserving, approved amounts, excess, decisions and workflow status.
+- Operational tasks/work queues with priorities, due dates and ownership.
+- Staff accounts, departments, branches and role administration.
+- General case notes and management document metadata/upload support.
+- Company/system settings.
+- Management dashboard with portfolio, claims, premium and work-queue metrics.
+- Summary reporting across policies, claims, leads, payments and tasks.
+- CSV exports for customers, policies, claims, leads, payments and tasks.
+- Audit events for material management actions.
+
+The existing customer assistant remains available and continues to support:
+
+- My Policy
+- Get a Quote
+- Report a Claim
+- Speak to an Agent
+- FAQ
+- English and draft Sesotho journeys
+- Claim evidence upload
 
 ## Ports
 
 The Docker stack uses separate frontend and backend ports:
 
-- Frontend: `http://localhost:3201`
+- Frontend and management UI: `http://localhost:3201`
+- Management portal: `http://localhost:3201/admin`
 - Backend API: `http://localhost:8201`
 - API docs: `http://localhost:8201/docs`
 - Backend health: `http://localhost:8201/health`
 
-The frontend nginx container proxies browser `/api`, `/webhooks`, `/health`, `/docs`, `/redoc`, and `/openapi.json` requests to the backend over the private Docker network. This keeps the browser application same-origin while still exposing the backend directly on port `8201` for development and integrations.
+The frontend nginx container proxies browser API requests to the backend over the private Docker network.
 
-## Recommended start: Docker
+## Start with Docker
 
 ```bash
 git clone https://github.com/Lelefe-dc/zenith-digital-insurance.git
@@ -38,22 +57,25 @@ cd zenith-digital-insurance
 cp .env.example .env
 ```
 
-Before shared or production-like use, change at least these values in `.env`:
+Change these values before shared use:
 
 ```env
-ADMIN_TOKEN=replace-with-a-long-random-token
-POSTGRES_PASSWORD=replace-with-a-strong-password
+MANAGEMENT_ADMIN_EMAIL=admin@zenith.local
+MANAGEMENT_ADMIN_PASSWORD=replace-with-a-strong-password
+POSTGRES_PASSWORD=replace-with-a-strong-database-password
 FRONTEND_PORT=3201
 BACKEND_PORT=8201
 ```
 
-Start the complete stack:
+The management bootstrap credentials are only used to create the initial Administrator account when the database is first seeded. Changing the environment password later does not silently reset an existing staff password.
+
+Start the stack:
 
 ```bash
 docker compose up -d --build
 ```
 
-Check container health and logs:
+Check services:
 
 ```bash
 docker compose ps
@@ -62,28 +84,110 @@ docker compose logs -f frontend app db
 
 Open:
 
-- Customer simulator: `http://localhost:3201/`
-- Operations dashboard: `http://localhost:3201/admin`
-- API docs: `http://localhost:8201/docs`
-- Backend health: `http://localhost:8201/health`
+- Customer assistant: `http://localhost:3201/`
+- Insurance management system: `http://localhost:3201/admin`
+- Swagger API: `http://localhost:8201/docs`
+- Health: `http://localhost:8201/health`
 
-Stop the stack without deleting data:
+Stop without deleting data:
 
 ```bash
 docker compose down
 ```
 
-To also delete the PostgreSQL and uploaded-file volumes, use this only when you intentionally want to erase Docker-managed data:
+Delete the database and uploaded-file volumes only when intentionally resetting all Docker-managed data:
 
 ```bash
 docker compose down -v
 ```
 
-The default ports can be overridden in `.env` with `FRONTEND_PORT` and `BACKEND_PORT`.
+## Management data model
 
-## Local Python start
+The management layer extends the original assistant data with:
 
-For development without Docker:
+- `customers`
+- `insurance_products`
+- `branches`
+- `staff_users`
+- `management_sessions`
+- `policy_profiles`
+- `premium_payments`
+- `lead_profiles`
+- `claim_profiles`
+- `work_tasks`
+- `case_notes`
+- `managed_documents`
+- `system_settings`
+
+The original `policies`, `leads`, `claims`, `claim_attachments`, conversation, FAQ and audit tables remain in use. This lets the management application operate on the same operational records produced by the customer assistant.
+
+## Seed data
+
+Development seed data includes:
+
+- Administrator account from `MANAGEMENT_ADMIN_EMAIL` / `MANAGEMENT_ADMIN_PASSWORD`.
+- Maseru, Teyateyaneng and Mafeteng branches.
+- Motor, Property, Funeral and Life products.
+- Three demonstration customers and policies.
+- Demonstration premium records and work-queue tasks.
+
+Customer assistant policy test:
+
+```text
+Policy: ZEN-100001
+Date of birth: 01/01/1990
+```
+
+## Role model
+
+The current application uses these roles:
+
+- **Administrator** — full system and staff/settings administration.
+- **Manager** — broad operational and reporting access.
+- **Underwriter** — product and policy management.
+- **Claims** — claim assessment and claims workflow.
+- **Finance** — premium and payment management.
+- **Agent** — customer, sales and task access.
+- **Viewer** — read-oriented access.
+
+The backend remains the authority for restricted actions; UI visibility is not treated as an access-control boundary.
+
+## Management API
+
+Core routes use the prefix:
+
+```text
+/api/v1/management
+```
+
+Major endpoint groups:
+
+```text
+/auth
+/dashboard
+/customers
+/products
+/branches
+/policies
+/payments
+/leads
+/claims
+/tasks
+/staff
+/notes
+/documents
+/settings
+/reports
+/exports
+```
+
+Management sessions are sent as a Bearer token:
+
+```http
+Authorization: Bearer <management-token>
+```
+
+## Local Python development
 
 ```bash
 python -m venv .venv
@@ -93,116 +197,76 @@ cp .env.example .env
 bash scripts/start.sh
 ```
 
-The non-Docker Python launcher still runs the combined FastAPI application directly. The Docker Compose setup is the recommended way to run the split frontend/backend deployment.
+Docker Compose is the recommended development path because it uses the same PostgreSQL-backed topology as the intended deployment architecture.
 
-The default local configuration uses SQLite. The default development admin token is `change-me`; change it before any shared deployment.
+## WhatsApp phase
 
-## Demo policy
+The existing Meta adapter remains in the repository for compatibility, but it is **not part of the current management-system phase**. No additional WhatsApp work should be treated as complete until the management platform, workflows, roles, reporting and production data integrations are ready.
 
-Use these values to test **My Policy**:
+The final WhatsApp phase will connect the approved customer journeys to this management system so that messages create and update the same customers, leads, claims, policies and service records used by staff.
 
-- Policy number: `ZEN-100001`
-- Date of birth: `01/01/1990`
+## Production hardening still required
 
-Other seeded policies are `ZEN-100002` and `ZEN-100003`.
+Before production launch, Zenith should complete or approve:
 
-## Docker architecture
+1. Authoritative policy/customer data migration or integration.
+2. Formal database migrations and release procedures.
+3. SSO/MFA or enterprise identity integration for staff.
+4. Detailed permission matrix and segregation-of-duties review.
+5. Strong password policy, account lockout and recovery workflow.
+6. Object storage and malware scanning for documents.
+7. Encryption, secret management and key rotation.
+8. Data retention and privacy policies.
+9. Backup, restore and disaster-recovery procedures.
+10. Monitoring, alerting, structured logs and performance telemetry.
+11. Formal underwriting, claims and finance approval workflows.
+12. Production reporting requirements and statutory/regulatory reports.
+13. External payment, accounting and banking integrations where required.
+14. Final Sesotho wording and customer communication approval.
+15. WhatsApp Business integration as the final customer-channel phase.
 
-The Compose stack contains:
+## Tests and CI
 
-- `frontend` — nginx serving the Zenith web interface on host port `3201` and reverse-proxying browser API requests to the backend.
-- `app` — FastAPI/Uvicorn backend exposed on host port `8201` and listening on container port `8000`.
-- `db` — PostgreSQL 16 Alpine.
-- `zenith_db` — persistent PostgreSQL data volume.
-- `zenith_uploads` — persistent claim-attachment volume.
-- `zenith` — isolated bridge network for frontend, backend, and database traffic.
-
-The backend image runs as a non-root user and includes a `/health` container health check. PostgreSQL has a readiness health check. The frontend waits for the backend to become healthy, and the backend waits for PostgreSQL before starting.
-
-Useful Docker commands:
-
-```bash
-# Rebuild after code changes
-docker compose up -d --build
-
-# Show running services and health
-docker compose ps
-
-# Follow all logs
-docker compose logs -f
-
-# Follow only frontend/backend logs
-docker compose logs -f frontend app
-
-# Restart frontend and backend
-docker compose restart frontend app
-
-# Open a shell in the backend container
-docker compose exec app sh
-```
-
-## WhatsApp Cloud API
-
-The backend includes the webhook route:
-
-- `GET /webhooks/whatsapp` — Meta verification
-- `POST /webhooks/whatsapp` — inbound messages
-
-Set these in `.env` or your deployment secret store:
-
-```env
-WHATSAPP_VERIFY_TOKEN=...
-WHATSAPP_ACCESS_TOKEN=...
-WHATSAPP_PHONE_NUMBER_ID=...
-WHATSAPP_APP_SECRET=...
-```
-
-For a direct backend deployment, the callback can point to port `8201` during development. In production, expose the backend or reverse proxy over public HTTPS rather than a raw development port.
-
-When WhatsApp credentials are blank, the browser simulator continues to work and outbound WhatsApp messages are logged rather than sent.
-
-## Production work still requiring Zenith decisions / credentials
-
-This repository is a functional MVP. Production launch still requires integration with Zenith's authoritative systems and approved credentials, including:
-
-1. Replace demo policy lookup with Zenith's real policy/customer API.
-2. Connect quote leads to Zenith's CRM or sales queue.
-3. Connect claims to the authoritative claims platform and document store.
-4. Connect a live-agent/contact-centre platform for real-time handoff.
-5. Add OTP/strong identity verification before exposing richer policy data.
-6. Add malware scanning/object storage for uploaded documents.
-7. Obtain approval for final Sesotho translations, privacy notices, retention policy and customer wording.
-8. Put the operations dashboard behind Zenith SSO/RBAC.
-9. Add production observability, backups, rate limiting and formal secret management.
-
-## Test
+Run locally:
 
 ```bash
 pytest -q
 ```
 
-GitHub Actions validates the Python tests, Docker Compose configuration, backend image build, and frontend image build on pull requests targeting `main`.
+GitHub Actions validates:
 
-## Core project structure
+- Python tests
+- Docker Compose configuration
+- Backend image build
+- Frontend image build
+
+## Project structure
 
 ```text
 app/
-  main.py          API, admin endpoints, upload handling
-  engine.py        conversation state machine and business journeys
-  models.py        database models
-  seed.py          demo policies and FAQ content
-  whatsapp.py      Meta WhatsApp webhook + outbound adapter
-  static/          branded simulator and operations dashboard
+  main.py                  FastAPI application
+  engine.py                customer-assistant conversation engine
+  models.py                original assistant operational models
+  management.py            authenticated management API
+  management_models.py     management data model
+  management_schemas.py    management request validation
+  security.py              password/session hashing utilities
+  seed.py                  development seed data
+  whatsapp.py              deferred WhatsApp adapter
+  static/
+    index.html              customer assistant
+    admin.html              insurance management application
+    admin.js                management frontend logic
+    management.css          management UI styling
+    styles.css              customer UI styling
 deploy/
-  nginx.conf       frontend static serving + backend reverse proxy
+  nginx.conf
 tests/
-scripts/start.sh
-Dockerfile             backend image
-Dockerfile.frontend    frontend nginx image
+Dockerfile
+Dockerfile.frontend
 docker-compose.yml
-.dockerignore
 ```
 
 ## Security note
 
-The demo deliberately returns only a limited policy summary. Policy number + date of birth should not be treated as sufficient authentication for sensitive production servicing. The project is structured so stronger verification can be added before production.
+The customer assistant's policy number + date-of-birth verification is still a demonstration mechanism and is not sufficient for sensitive production servicing. Stronger customer identity verification should be completed before production exposure of detailed policy data.

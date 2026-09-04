@@ -19,7 +19,20 @@ jobs:
           python-version: '3.12'
           cache: pip
       - run: pip install -r requirements.txt pytest
-      - run: pytest -q
+      - name: Compile Python
+        run: python -m compileall -q app tests
+      - name: Validate management JavaScript
+        run: |
+          node --check app/static/admin.js
+          node --check app/static/admin-extra.js
+      - name: Run tests
+        run: pytest -q
+      - name: Import application
+        env:
+          DATABASE_URL: sqlite:////tmp/zenith-ci.db
+          MANAGEMENT_ADMIN_EMAIL: admin@zenith.local
+          MANAGEMENT_ADMIN_PASSWORD: change-me-now
+        run: python -c "from app.main import app; assert app.version == '2.0.0'; print(app.title)"
       - name: Validate Docker Compose
         run: docker compose config > /tmp/zenith-compose.yml
       - name: Build backend image
