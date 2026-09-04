@@ -19,9 +19,18 @@ A runnable implementation of the **Zenith Horizon Insurance Company Limited** di
 - SQLite for quick local development and PostgreSQL for the Docker stack.
 - Demo seed policies and automated journey tests.
 
-## Recommended start: Docker
+## Ports
 
-Docker Compose starts both the application and PostgreSQL, waits for PostgreSQL to become healthy, persists the database and claim uploads in named volumes, and exposes the application on port `8000` by default.
+The Docker stack uses separate frontend and backend ports:
+
+- Frontend: `http://localhost:3201`
+- Backend API: `http://localhost:8201`
+- API docs: `http://localhost:8201/docs`
+- Backend health: `http://localhost:8201/health`
+
+The frontend nginx container proxies browser `/api`, `/webhooks`, `/health`, `/docs`, `/redoc`, and `/openapi.json` requests to the backend over the private Docker network. This keeps the browser application same-origin while still exposing the backend directly on port `8201` for development and integrations.
+
+## Recommended start: Docker
 
 ```bash
 git clone https://github.com/Lelefe-dc/zenith-digital-insurance.git
@@ -34,6 +43,8 @@ Before shared or production-like use, change at least these values in `.env`:
 ```env
 ADMIN_TOKEN=replace-with-a-long-random-token
 POSTGRES_PASSWORD=replace-with-a-strong-password
+FRONTEND_PORT=3201
+BACKEND_PORT=8201
 ```
 
 Start the complete stack:
@@ -46,15 +57,15 @@ Check container health and logs:
 
 ```bash
 docker compose ps
-docker compose logs -f app
+docker compose logs -f frontend app db
 ```
 
 Open:
 
-- Customer simulator: `http://localhost:8000/`
-- Operations dashboard: `http://localhost:8000/admin`
-- API docs: `http://localhost:8000/docs`
-- Health: `http://localhost:8000/health`
+- Customer simulator: `http://localhost:3201/`
+- Operations dashboard: `http://localhost:3201/admin`
+- API docs: `http://localhost:8201/docs`
+- Backend health: `http://localhost:8201/health`
 
 Stop the stack without deleting data:
 
@@ -68,7 +79,7 @@ To also delete the PostgreSQL and uploaded-file volumes, use this only when you 
 docker compose down -v
 ```
 
-Set `APP_PORT` in `.env` if port 8000 is already in use, for example `APP_PORT=8080`.
+The default ports can be overridden in `.env` with `FRONTEND_PORT` and `BACKEND_PORT`.
 
 ## Local Python start
 
@@ -81,6 +92,8 @@ pip install -r requirements.txt
 cp .env.example .env
 bash scripts/start.sh
 ```
+
+The non-Docker Python launcher still runs the combined FastAPI application directly. The Docker Compose setup is the recommended way to run the split frontend/backend deployment.
 
 The default local configuration uses SQLite. The default development admin token is `change-me`; change it before any shared deployment.
 
@@ -97,13 +110,14 @@ Other seeded policies are `ZEN-100002` and `ZEN-100003`.
 
 The Compose stack contains:
 
-- `app` — FastAPI/Uvicorn application built from this repository.
+- `frontend` — nginx serving the Zenith web interface on host port `3201` and reverse-proxying browser API requests to the backend.
+- `app` — FastAPI/Uvicorn backend exposed on host port `8201` and listening on container port `8000`.
 - `db` — PostgreSQL 16 Alpine.
 - `zenith_db` — persistent PostgreSQL data volume.
 - `zenith_uploads` — persistent claim-attachment volume.
-- `zenith` — isolated bridge network for app-to-database traffic.
+- `zenith` — isolated bridge network for frontend, backend, and database traffic.
 
-The application image runs as a non-root user and includes a `/health` container health check. PostgreSQL also has a readiness health check, and the app waits for the database before starting.
+The backend image runs as a non-root user and includes a `/health` container health check. PostgreSQL has a readiness health check. The frontend waits for the backend to become healthy, and the backend waits for PostgreSQL before starting.
 
 Useful Docker commands:
 
@@ -117,16 +131,19 @@ docker compose ps
 # Follow all logs
 docker compose logs -f
 
-# Restart only the application
-docker compose restart app
+# Follow only frontend/backend logs
+docker compose logs -f frontend app
 
-# Open a shell in the app container
+# Restart frontend and backend
+docker compose restart frontend app
+
+# Open a shell in the backend container
 docker compose exec app sh
 ```
 
 ## WhatsApp Cloud API
 
-The project includes the webhook route:
+The backend includes the webhook route:
 
 - `GET /webhooks/whatsapp` — Meta verification
 - `POST /webhooks/whatsapp` — inbound messages
@@ -140,9 +157,7 @@ WHATSAPP_PHONE_NUMBER_ID=...
 WHATSAPP_APP_SECRET=...
 ```
 
-Configure the public HTTPS callback in Meta to point to:
-
-`https://YOUR-DOMAIN/webhooks/whatsapp`
+For a direct backend deployment, the callback can point to port `8201` during development. In production, expose the backend or reverse proxy over public HTTPS rather than a raw development port.
 
 When WhatsApp credentials are blank, the browser simulator continues to work and outbound WhatsApp messages are logged rather than sent.
 
@@ -166,7 +181,7 @@ This repository is a functional MVP. Production launch still requires integratio
 pytest -q
 ```
 
-GitHub Actions validates the Python tests, Docker Compose configuration, and application image build on pushes to `main` and pull requests targeting `main`.
+GitHub Actions validates the Python tests, Docker Compose configuration, backend image build, and frontend image build on pull requests targeting `main`.
 
 ## Core project structure
 
@@ -178,9 +193,12 @@ app/
   seed.py          demo policies and FAQ content
   whatsapp.py      Meta WhatsApp webhook + outbound adapter
   static/          branded simulator and operations dashboard
+deploy/
+  nginx.conf       frontend static serving + backend reverse proxy
 tests/
 scripts/start.sh
-Dockerfile
+Dockerfile             backend image
+Dockerfile.frontend    frontend nginx image
 docker-compose.yml
 .dockerignore
 ```

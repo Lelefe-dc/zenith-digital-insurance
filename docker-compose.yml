@@ -23,11 +23,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: zenith-digital-insurance:local
+    image: zenith-digital-insurance-backend:local
     restart: unless-stopped
     init: true
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "${BACKEND_PORT:-8201}:8000"
     environment:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-zenith}:${POSTGRES_PASSWORD:-zenith_dev_password}@db:5432/${POSTGRES_DB:-zenith_assistant}
@@ -51,6 +51,27 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+    networks:
+      - zenith
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: zenith-digital-insurance-frontend:local
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${FRONTEND_PORT:-3201}:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - zenith
 
