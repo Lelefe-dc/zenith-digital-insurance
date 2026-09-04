@@ -3,80 +3,120 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zenith Insurance Management</title>
+  <meta name="theme-color" content="#0b4d46" />
+  <title>Zenith Horizon | Insurance Management</title>
   <link rel="stylesheet" href="/static/management.css" />
 </head>
 <body>
   <div id="loginView" class="login-view">
-    <div class="login-card">
-      <img src="/static/zenith-logo.png" alt="Zenith Horizon Insurance Company Limited" class="login-logo" />
-      <span class="eyebrow">Secure staff portal</span>
-      <h1>Insurance Management System</h1>
-      <p>Manage customers, policies, premiums, leads, claims, service requests, work queues, staff and reports from one place.</p>
-      <form id="loginForm" class="login-form">
-        <label>Email<input id="loginEmail" type="email" autocomplete="username" required placeholder="admin@zenith.local" /></label>
-        <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Enter your password" /></label>
-        <button type="submit" class="primary wide">Sign in</button>
-        <div id="loginStatus" class="form-status"></div>
-      </form>
-      <small>Development bootstrap credentials are controlled by <code>MANAGEMENT_ADMIN_EMAIL</code> and <code>MANAGEMENT_ADMIN_PASSWORD</code>.</small>
-    </div>
+    <section class="login-showcase" aria-hidden="true">
+      <div class="login-showcase-inner">
+        <div class="showcase-brand"><img src="/static/zenith-logo.png" alt="" /><span>Zenith Horizon Insurance</span></div>
+        <div class="showcase-copy">
+          <span class="showcase-kicker">Insurance operations, connected</span>
+          <h1>One workspace for the work that protects customers.</h1>
+          <p>Bring customer service, underwriting, premiums, claims, sales and management reporting into one secure operational view.</p>
+        </div>
+        <div class="showcase-points">
+          <div><b>01</b><span>Customers & policy servicing</span></div>
+          <div><b>02</b><span>Claims & service workflows</span></div>
+          <div><b>03</b><span>Premiums, tasks & reporting</span></div>
+        </div>
+        <small>Zenith Horizon Insurance Company Limited · Staff access only</small>
+      </div>
+    </section>
+
+    <section class="login-panel">
+      <div class="login-card">
+        <a href="/" class="login-back">← Public website</a>
+        <img src="/static/zenith-logo.png" alt="Zenith Horizon Insurance Company Limited" class="login-logo" />
+        <span class="eyebrow">Secure staff portal</span>
+        <h2>Welcome back</h2>
+        <p class="login-intro">Sign in to continue to the Zenith insurance management workspace.</p>
+        <form id="loginForm" class="login-form">
+          <label>Email address<input id="loginEmail" type="email" autocomplete="username" required placeholder="name@company.co.ls" /></label>
+          <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Enter your password" /></label>
+          <button type="submit" class="primary wide">Sign in securely</button>
+          <div id="loginStatus" class="form-status" role="status" aria-live="polite"></div>
+        </form>
+        <div class="login-security"><span class="security-dot"></span><span>Protected staff session · Access is recorded in the audit trail</span></div>
+      </div>
+    </section>
   </div>
 
   <div id="appView" class="app-shell hidden">
-    <aside class="sidebar">
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <aside id="sidebar" class="sidebar">
       <div class="sidebar-brand">
-        <img src="/static/zenith-logo.png" alt="Zenith" />
-        <div><strong>Zenith Horizon</strong><span>Management</span></div>
+        <div class="brand-mark"><img src="/static/zenith-logo.png" alt="Zenith Horizon" /></div>
+        <div><strong>Zenith Horizon</strong><span>Insurance Management</span></div>
+        <button id="sidebarClose" class="sidebar-close" type="button" aria-label="Close menu">×</button>
       </div>
+
+      <div class="nav-label">Workspace</div>
       <nav id="navMenu">
-        <button data-page="dashboard" class="active"><span>⌂</span>Dashboard</button>
-        <button data-page="customers"><span>◉</span>Customers</button>
-        <button data-page="policies"><span>▣</span>Policies</button>
-        <button data-page="leads"><span>◇</span>Leads & Quotes</button>
-        <button data-page="claims"><span>△</span>Claims</button>
-        <button data-page="service"><span>☎</span>Service Desk</button>
-        <button data-page="payments"><span>₳</span>Premiums & Payments</button>
-        <button data-page="products"><span>▦</span>Products</button>
-        <button data-page="tasks"><span>✓</span>Tasks & Work Queue</button>
-        <button data-page="staff"><span>♙</span>Staff & Roles</button>
-        <button data-page="reports"><span>▥</span>Reports</button>
-        <button data-page="audit"><span>◎</span>Audit Trail</button>
-        <button data-page="settings"><span>⚙</span>Settings</button>
+        <button data-page="dashboard" class="active"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
+        <button data-page="customers"><span class="nav-icon">◉</span><span>Customers</span></button>
+        <button data-page="policies"><span class="nav-icon">▣</span><span>Policies</span></button>
+        <button data-page="leads"><span class="nav-icon">◇</span><span>Leads & Quotes</span></button>
+        <button data-page="claims"><span class="nav-icon">△</span><span>Claims</span></button>
+        <button data-page="service"><span class="nav-icon">☎</span><span>Service Desk</span></button>
+        <button data-page="payments"><span class="nav-icon">M</span><span>Premiums & Payments</span></button>
+        <button data-page="products"><span class="nav-icon">▦</span><span>Products</span></button>
+        <button data-page="tasks"><span class="nav-icon">✓</span><span>Tasks & Work Queue</span></button>
+
+        <div class="nav-label nav-label-inline">Control</div>
+        <button data-page="staff"><span class="nav-icon">♙</span><span>Staff & Roles</span></button>
+        <button data-page="reports"><span class="nav-icon">▥</span><span>Reports</span></button>
+        <button data-page="audit"><span class="nav-icon">◎</span><span>Audit Trail</span></button>
+        <button data-page="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
       </nav>
+
       <div class="sidebar-foot">
-        <a href="/" target="_blank">Open customer assistant ↗</a>
-        <button id="logoutBtn">Sign out</button>
+        <div class="sidebar-status"><span></span><div><strong>System online</strong><small>Core operations available</small></div></div>
+        <a href="/" target="_blank" rel="noopener">Open public website <span>↗</span></a>
+        <button id="logoutBtn"><span>Sign out</span><span>→</span></button>
       </div>
     </aside>
 
     <main class="main-area">
       <header class="topbar">
-        <div>
-          <span id="pageEyebrow" class="eyebrow">Overview</span>
-          <h1 id="pageTitle">Dashboard</h1>
+        <div class="topbar-left">
+          <button id="sidebarToggle" class="menu-toggle" type="button" aria-label="Open menu">☰</button>
+          <div>
+            <span id="pageEyebrow" class="eyebrow">Overview</span>
+            <h1 id="pageTitle">Dashboard</h1>
+          </div>
         </div>
         <div class="topbar-actions">
-          <div class="global-search"><input id="globalSearch" type="search" placeholder="Search customer, policy, claim..." /></div>
-          <button id="refreshBtn" class="secondary">Refresh</button>
-          <div class="user-chip"><div class="avatar" id="userInitials">ZA</div><div><strong id="userName">Administrator</strong><span id="userRole">Administrator</span></div></div>
+          <div class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Search customer, policy, claim..." aria-label="Global search" /></div>
+          <button id="refreshBtn" class="icon-action secondary" title="Refresh current page" aria-label="Refresh current page">↻</button>
+          <div class="user-chip">
+            <div class="avatar" id="userInitials">ZA</div>
+            <div><strong id="userName">Administrator</strong><span id="userRole">Administrator</span></div>
+          </div>
         </div>
       </header>
-      <div id="searchResults" class="search-results hidden"></div>
-      <div id="toast" class="toast hidden"></div>
-      <section id="pageContent" class="page-content"></section>
+
+      <div class="content-frame">
+        <div class="context-strip"><span class="live-dot"></span><span>Live operational data</span><i></i><span>Zenith Horizon Insurance Company Limited</span></div>
+        <div id="searchResults" class="search-results hidden"></div>
+        <div id="toast" class="toast hidden"></div>
+        <section id="pageContent" class="page-content"></section>
+      </div>
     </main>
   </div>
 
   <div id="modal" class="modal hidden" aria-hidden="true">
     <div class="modal-backdrop" data-close-modal></div>
-    <div class="modal-card">
-      <div class="modal-head"><div><span id="modalEyebrow" class="eyebrow">Create</span><h2 id="modalTitle">Record</h2></div><button class="icon-btn" data-close-modal>×</button></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head"><div><span id="modalEyebrow" class="eyebrow">Create</span><h2 id="modalTitle">Record</h2></div><button class="icon-btn" data-close-modal type="button" aria-label="Close">×</button></div>
       <form id="modalForm" class="modal-form"></form>
     </div>
   </div>
 
   <script src="/static/admin.js"></script>
   <script src="/static/admin-extra.js"></script>
+  <script src="/static/admin-shell.js"></script>
 </body>
 </html>
