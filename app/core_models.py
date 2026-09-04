@@ -123,3 +123,39 @@ class PolicyIntermediary(Base):
     earned_commission: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ApprovalRequest(Base):
+    __tablename__ = "approval_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    reference: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    workflow: Mapped[str] = mapped_column(String(80), index=True)
+    entity_type: Mapped[str] = mapped_column(String(40), index=True)
+    entity_id: Mapped[int] = mapped_column(Integer, index=True)
+    stage: Mapped[str] = mapped_column(String(60), default="Review", index=True)
+    status: Mapped[str] = mapped_column(String(30), default="Pending", index=True)
+    amount: Mapped[float | None] = mapped_column(Float, nullable=True)
+    requested_by_id: Mapped[int] = mapped_column(ForeignKey("staff_users.id"), index=True)
+    assigned_to_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"), nullable=True, index=True)
+    decided_by_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    decision_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    requested_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class DocumentProfile(Base):
+    __tablename__ = "document_profiles"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("managed_documents.id"), unique=True, index=True)
+    category: Mapped[str] = mapped_column(String(80), default="General", index=True)
+    document_status: Mapped[str] = mapped_column(String(30), default="Current", index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    checksum_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    supersedes_document_id: Mapped[int | None] = mapped_column(ForeignKey("managed_documents.id"), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_by_id: Mapped[int | None] = mapped_column(ForeignKey("staff_users.id"), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
