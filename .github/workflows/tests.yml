@@ -20,21 +20,32 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt pytest
       - name: Compile Python
-        run: python -m compileall -q app tests
+        run: python -m compileall -q app tests alembic
       - name: Validate frontend JavaScript
         run: |
           node --check app/static/app.js
           node --check app/static/admin.js
           node --check app/static/admin-extra.js
+          node --check app/static/admin-core.js
+          node --check app/static/admin-governance.js
           node --check app/static/admin-shell.js
       - name: Run tests
         run: pytest -q
+      - name: Validate Alembic migration
+        env:
+          DATABASE_URL: sqlite:////tmp/zenith-migration-ci.db
+          MANAGEMENT_ADMIN_EMAIL: admin@zenith.local
+          MANAGEMENT_ADMIN_PASSWORD: ci-strong-admin-password
+        run: |
+          rm -f /tmp/zenith-migration-ci.db
+          alembic upgrade head
+          alembic current
       - name: Import application
         env:
-          DATABASE_URL: sqlite:////tmp/zenith-ci.db
+          DATABASE_URL: sqlite:////tmp/zenith-migration-ci.db
           MANAGEMENT_ADMIN_EMAIL: admin@zenith.local
-          MANAGEMENT_ADMIN_PASSWORD: change-me-now
-        run: python -c "from app.main import app; assert app.version == '2.0.0'; print(app.title)"
+          MANAGEMENT_ADMIN_PASSWORD: ci-strong-admin-password
+        run: python -c "from app.main import app; assert app.version == '2.1.0'; print(app.title)"
       - name: Validate Docker Compose
         run: docker compose config > /tmp/zenith-compose.yml
       - name: Build backend image

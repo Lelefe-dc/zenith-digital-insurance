@@ -11,29 +11,35 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 from .config import get_settings
-from .database import Base, SessionLocal, engine, get_db
+from .database import SessionLocal, get_db
 from .engine import handle_message, start_session
 from .management import router as management_router
 from .management_access import ManagementAccessMiddleware
 from .management_extras import router as management_extras_router
+from .core_insurance import router as core_insurance_router
+from .core_governance import router as core_governance_router
 from .models import AuditEvent, Claim, ClaimAttachment
 from .schemas import ChatMessageRequest, ChatResponse, ChatStartRequest
 from .seed import seed_demo_data
 from .whatsapp import router as whatsapp_router
 
 settings = get_settings()
-Base.metadata.create_all(bind=engine)
+
+# Database schema creation is owned by Alembic. Docker and scripts/start.sh run
+# `alembic upgrade head` before importing the application.
 with SessionLocal() as _db:
     seed_demo_data(_db)
 
 app = FastAPI(
     title=settings.app_name,
-    version="2.0.0",
-    description="Zenith Horizon Insurance Company Limited digital insurance and management platform",
+    version="2.1.0",
+    description="Zenith Horizon Insurance Company Limited digital insurance and core management platform",
 )
 app.add_middleware(ManagementAccessMiddleware)
 app.include_router(management_router)
 app.include_router(management_extras_router)
+app.include_router(core_insurance_router)
+app.include_router(core_governance_router)
 # WhatsApp is kept dormant for the final integration phase. Existing webhook
 # compatibility remains available without being part of the management UI.
 app.include_router(whatsapp_router)
@@ -54,7 +60,7 @@ def admin_page():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": settings.app_name, "environment": settings.environment, "version": "2.0.0"}
+    return {"status": "ok", "service": settings.app_name, "environment": settings.environment, "version": "2.1.0"}
 
 
 @app.post("/api/v1/chat/start", response_model=ChatResponse)
