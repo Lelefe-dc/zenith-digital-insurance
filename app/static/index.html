@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zenith Digital Insurance Assistant</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="brandbar">
+      <div class="brand-left">
+        <img src="/static/zenith-logo.png" alt="Zenith Horizon Insurance Company Limited" class="logo" />
+        <div>
+          <h1>Digital Insurance Assistant</h1>
+          <p>Policy • Quotes • Claims • Human support</p>
+        </div>
+      </div>
+      <div class="status"><span></span> Online demo</div>
+    </header>
+
+    <main class="workspace">
+      <section class="info-panel">
+        <h2>Zenith self-service</h2>
+        <p>This functional demo implements the project manual flows for Zenith Horizon Insurance Company Limited.</p>
+        <div class="feature-grid">
+          <div class="feature"><b>My Policy</b><span>Verified policy summary</span></div>
+          <div class="feature"><b>Get a Quote</b><span>Product-aware lead capture</span></div>
+          <div class="feature"><b>Report a Claim</b><span>FNOL + evidence upload</span></div>
+          <div class="feature"><b>Speak to an Agent</b><span>Context-aware support ticket</span></div>
+          <div class="feature"><b>FAQ</b><span>Approved bilingual answers</span></div>
+          <div class="feature"><b>WhatsApp-ready</b><span>Meta webhook adapter included</span></div>
+        </div>
+        <div class="demo-card">
+          <h3>Demo policy</h3>
+          <code>ZEN-100001</code>
+          <span>Date of birth: <b>01/01/1990</b></span>
+        </div>
+        <a class="admin-link" href="/admin">Open operations dashboard →</a>
+      </section>
+
+      <section class="chat-card">
+        <div class="chat-head">
+          <div class="avatar">Z</div>
+          <div><strong>Zenith Assistant</strong><small>Automated insurance service</small></div>
+          <button id="resetBtn" class="ghost">New chat</button>
+        </div>
+        <div id="messages" class="messages"></div>
+        <div id="quickReplies" class="quick-replies"></div>
+        <div id="uploadBox" class="upload-box hidden">
+          <label>Attach claim evidence (JPG, PNG, WEBP or PDF)</label>
+          <div><input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" /><button id="uploadBtn">Upload</button></div>
+          <small id="uploadStatus"></small>
+        </div>
+        <form id="chatForm" class="composer">
+          <input id="chatInput" autocomplete="off" placeholder="Type a message…" />
+          <button type="submit">Send</button>
+        </form>
+        <div class="commands">Commands: <b>0</b> Main Menu · <b>Cancel</b> · <b>Agent</b></div>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
