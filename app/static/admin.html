@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zenith Assistant Operations</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <header class="brandbar admin-brand">
+      <div class="brand-left"><img src="/static/zenith-logo.png" class="logo" alt="Zenith" /><div><h1>Assistant Operations</h1><p>Leads, claims, handoffs and audit activity</p></div></div>
+      <a class="admin-link" href="/">← Customer simulator</a>
+    </header>
+    <div class="token-bar"><label>Admin token <input id="adminToken" type="password" placeholder="change-me" /></label><button id="loadDashboard">Load dashboard</button><span id="adminStatus"></span></div>
+    <div id="metrics" class="metrics"></div>
+    <section class="data-card"><h2>Recent quote leads</h2><div id="leads"></div></section>
+    <section class="data-card"><h2>Recent claims</h2><div id="claims"></div></section>
+    <section class="data-card"><h2>Recent agent tickets</h2><div id="tickets"></div></section>
+  </div>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

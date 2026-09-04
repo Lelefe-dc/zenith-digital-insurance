@@ -4,30 +4,31 @@ A runnable implementation of the **Zenith Horizon Insurance Company Limited** di
 
 ## What is implemented
 
-- Branded customer chat simulator with the supplied Zenith logo.
+- Branded customer chat simulator with the Zenith logo.
 - English and draft Sesotho conversation packs.
 - Five required journeys: **My Policy, Get a Quote, Report a Claim, Speak to an Agent, FAQ**.
 - Policy verification using policy number + date of birth, with neutral failure messages and retry limits.
 - Product-specific quote/lead capture for Motor, Property, Funeral and Life insurance.
 - First-notification-of-loss claim capture with generated claim references.
 - Claim evidence upload for JPG, PNG, WEBP and PDF files with file-size/type controls.
-- Human-agent support tickets with basic queue routing and conversation linkage.
+- Human-agent support tickets with queue routing and conversation linkage.
 - FAQ content stored in the database.
 - Audit events for material journey actions.
 - Operations dashboard for recent leads, claims and support tickets.
 - Meta WhatsApp Cloud API webhook verification, inbound message handling and outbound text adapter.
-- SQLite for quick local demo and PostgreSQL configuration via Docker Compose.
+- SQLite for quick local development and PostgreSQL configuration via Docker Compose.
 - Demo seed policies and automated journey tests.
 
-## Quick start (local Python)
+## Quick start
 
 ```bash
-cd zenith-digital-insurance-assistant
+git clone https://github.com/Lelefe-dc/zenith-digital-insurance.git
+cd zenith-digital-insurance
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-./scripts/start.sh
+bash scripts/start.sh
 ```
 
 Open:
@@ -37,7 +38,7 @@ Open:
 - API docs: `http://localhost:8000/docs`
 - Health: `http://localhost:8000/health`
 
-The default demo admin token is `change-me`. Change it in `.env` before any shared deployment.
+The default development admin token is `change-me`. Change it in `.env` before any shared deployment.
 
 ## Demo policy
 
@@ -76,20 +77,20 @@ Configure the public HTTPS callback in Meta to point to:
 
 `https://YOUR-DOMAIN/webhooks/whatsapp`
 
-When WhatsApp credentials are blank, the browser simulator continues to work and outbound WhatsApp messages are only logged.
+When WhatsApp credentials are blank, the browser simulator continues to work and outbound WhatsApp messages are logged rather than sent.
 
 ## Production work still requiring Zenith decisions / credentials
 
-This repository is a complete functional MVP, but production launch requires external business systems and approved credentials. In particular:
+This repository is a functional MVP. Production launch still requires integration with Zenith's authoritative systems and approved credentials, including:
 
-1. Replace the demo policy table/lookup with Zenith's real policy/customer API.
-2. Connect the lead flow to Zenith's CRM or sales queue.
+1. Replace demo policy lookup with Zenith's real policy/customer API.
+2. Connect quote leads to Zenith's CRM or sales queue.
 3. Connect claims to the authoritative claims platform and document store.
-4. Connect a real live-agent/contact-centre platform for synchronous handoff.
-5. Add a real OTP provider and enable stronger identity verification before exposing richer policy data.
-6. Add malware scanning/object storage for uploaded documents; the demo stores files locally.
-7. Have Zenith approve the final Sesotho translations, privacy notices, retention policy and customer wording.
-8. Put the admin dashboard behind Zenith SSO/RBAC; the demo uses a shared token.
+4. Connect a live-agent/contact-centre platform for real-time handoff.
+5. Add OTP/strong identity verification before exposing richer policy data.
+6. Add malware scanning/object storage for uploaded documents.
+7. Obtain approval for final Sesotho translations, privacy notices, retention policy and customer wording.
+8. Put the operations dashboard behind Zenith SSO/RBAC.
 9. Add production observability, backups, rate limiting and formal secret management.
 
 ## Test
@@ -107,7 +108,8 @@ app/
   models.py        database models
   seed.py          demo policies and FAQ content
   whatsapp.py      Meta WhatsApp webhook + outbound adapter
-  static/          branded simulator and admin dashboard
+  static/          branded simulator and operations dashboard
+tests/
 scripts/start.sh
 Dockerfile
 docker-compose.yml
@@ -115,5 +117,4 @@ docker-compose.yml
 
 ## Security note
 
-The demo deliberately returns only a limited policy summary. Policy number + DOB should not be treated as sufficient authentication for sensitive production servicing. The project is structured so Zenith can add OTP/stronger verification before production.
-# zenith-digital-insurance
+The demo deliberately returns only a limited policy summary. Policy number + date of birth should not be treated as sufficient authentication for sensitive production servicing. The project is structured so stronger verification can be added before production.
