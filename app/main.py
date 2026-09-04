@@ -14,6 +14,7 @@ from .config import get_settings
 from .database import Base, SessionLocal, engine, get_db
 from .engine import handle_message, start_session
 from .management import router as management_router
+from .management_extras import router as management_extras_router
 from .models import AuditEvent, Claim, ClaimAttachment
 from .schemas import ChatMessageRequest, ChatResponse, ChatStartRequest
 from .seed import seed_demo_data
@@ -30,6 +31,7 @@ app = FastAPI(
     description="Zenith Horizon Insurance Company Limited digital insurance and management platform",
 )
 app.include_router(management_router)
+app.include_router(management_extras_router)
 # WhatsApp is kept dormant for the final integration phase. Existing webhook
 # compatibility remains available without being part of the management UI.
 app.include_router(whatsapp_router)
